@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 上线后请把域名替换为正式域名（PRD 11.2 / 11.7：提交 sitemap 至搜索引擎）
+Sitemap: https://ziweidoushu.vercel.app/sitemap.xml

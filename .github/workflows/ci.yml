@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 类型检查
+        run: npm run typecheck
+
+      - name: 单元测试（引擎 / 黄金样本 / 分享编码 / 格局）
+        run: npm test
+
+      - name: 硬编码色值扫描（PRD 15.3 卡点）
+        run: npm run check:tokens
+
+      - name: 构建
+        run: npm run build
+
+      - name: 包体预算（PRD 9.7 卡点）
+        run: npm run check:size
