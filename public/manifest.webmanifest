@@ -1,0 +1,19 @@
+{
+  "name": "紫微鉴 · 紫微斗数排盘",
+  "short_name": "紫微鉴",
+  "description": "紫微斗数在线排盘：真太阳时校正、农历闰月、安星依据可溯源，数据只在本机处理，支持离线查看。",
+  "lang": "zh-CN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f0e6",
+  "theme_color": "#a03a2b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

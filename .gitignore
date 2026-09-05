@@ -1,0 +1,24 @@
+# 依赖
+node_modules
+
+# 构建产物
+dist
+dist-ssr
+.vite
+
+# 本地与编辑器
+*.local
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+coverage
+vitest-out.txt
+vitest-report.json
+
+# IDE 辅助数据（非临时缓存，但不入库）
+.codebuddy/

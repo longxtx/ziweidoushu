@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>紫微鉴 · 紫微斗数排盘</title>
+    <meta
+      name="description"
+      content="准确的紫微斗数在线排盘工具：真太阳时校正、农历闰月、十四主星与四化，每个结论都可追溯到安星依据。数据只在本机处理。"
+    />
+    <meta name="theme-color" content="#f5f0e6" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="紫微鉴" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--
+      分享卡片（og / twitter）。
+      提示：微信等社交平台的稳定预览要求 og:image 为站点绝对地址。
+      部署上线后请将下方 og:image / twitter:image 的 /og-image.svg 替换为完整域名地址，
+      例如 https://your-domain.com/og-image.svg
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="紫微鉴" />
+    <meta property="og:title" content="紫微鉴 · 紫微斗数排盘" />
+    <meta
+      property="og:description"
+      content="准确的紫微斗数在线排盘：真太阳时校正、农历闰月、安星依据可溯源，数据只在本机处理。"
+    />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="紫微鉴 · 紫微斗数排盘" />
+    <meta
+      name="twitter:description"
+      content="紫微斗数在线排盘：真太阳时校正、农历闰月、安星依据可溯源，数据只在本机处理。"
+    />
+    <meta name="twitter:image" content="/og-image.svg" />
+    <script>
+      // 防闪屏：首屏前同步确定主题（PRD 6.6）
+      (function () {
+        try {
+          var t = localStorage.getItem('zw-theme');
+          if (!t) {
+            t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

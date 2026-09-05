@@ -1,0 +1,151 @@
+/**
+ * 设计令牌（对应 PRD 第 6 章与附录 C）
+ * 本文件是全项目唯一允许出现 hex 色值的地方，CI 会对此做扫描。
+ * 组件内一律通过 var(--token) 或 Tailwind 语义类引用。
+ */
+
+:root {
+  /* 字体 */
+  --serif: 'Songti SC', 'STSong', 'SimSun', 'Noto Serif SC', serif;
+  --kai: 'Kaiti SC', 'STKaiti', 'KaiTi', 'Noto Serif SC', serif;
+
+  /* 形状与阴影 */
+  --radius: 14px;
+  --radius-sm: 6px;
+  --shadow: 0 4px 20px rgba(60, 45, 25, 0.06);
+
+  /* 浅色主题（宣纸，默认） */
+  --bg: #f5f0e6;
+  --bg-card: #fdfaf3;
+  --ink: #2b2620;
+  --ink-light: #6b6258;
+  --cinnabar: #a03a2b;
+  --cinnabar-dark: #842f22;
+  --gold: #b78a3f;
+  --border: #e2d8c4;
+
+  /* 渐变 */
+  --grad-btn: linear-gradient(135deg, #a03a2b, #842f22);
+  --grad-line: linear-gradient(90deg, #a03a2b, #b78a3f, #a03a2b);
+  /* 中宫：朱砂/金径向淡晕（PRD 6.5） */
+  --grad-center: radial-gradient(circle at 50% 42%, rgba(160, 58, 43, 0.06), rgba(183, 138, 63, 0.1) 48%, rgba(183, 138, 63, 0) 72%);
+
+  /* 淡底强调色：不用 color-mix()，以兼容旧版 Safari 与微信内置浏览器 */
+  --cinnabar-soft: rgba(160, 58, 43, 0.06);
+  --gold-soft: rgba(183, 138, 63, 0.08);
+  --error-soft: rgba(160, 58, 43, 0.08);
+
+  /* 强调色之上的文字，与浮层遮罩层级 */
+  --on-accent: #fff;
+  --overlay: rgba(43, 38, 32, 0.4);
+  --overlay-soft: rgba(0, 0, 0, 0.3);
+  --overlay-deep: rgba(43, 38, 32, 0.5);
+  --toast-bg: rgba(43, 38, 32, 0.92);
+
+  /* 四化 */
+  --mu-lu: #b78a3f;
+  --mu-quan: #a03a2b;
+  --mu-ke: #3d6b4d;
+  --mu-ji: #2b2620;
+
+  /* 五行 */
+  --wx-wood: #4a7c59;
+  --wx-fire: #c0392b;
+  --wx-earth: #b7791f;
+  --wx-metal: #8d8d8d;
+  --wx-water: #2c3e50;
+
+  /* 旺衰五态（复用于斗数庙旺七级） */
+  --st-wang-fg: #8a6522;
+  --st-wang-bg: rgba(183, 138, 63, 0.12);
+  --st-wang-bd: rgba(183, 138, 63, 0.4);
+  --st-xiang-fg: #3d6b4d;
+  --st-xiang-bg: rgba(74, 124, 89, 0.1);
+  --st-xiang-bd: rgba(74, 124, 89, 0.3);
+  --st-xiu-fg: #3d5f7a;
+  --st-xiu-bg: rgba(74, 110, 140, 0.1);
+  --st-xiu-bd: rgba(74, 110, 140, 0.3);
+  --st-qiu-fg: #8a5a22;
+  --st-qiu-bg: rgba(160, 102, 42, 0.1);
+  --st-qiu-bd: rgba(160, 102, 42, 0.3);
+  --st-shuai-fg: #6b6258;
+  --st-shuai-bg: rgba(107, 98, 88, 0.1);
+  --st-shuai-bd: rgba(107, 98, 88, 0.3);
+
+  /* 导出图专用：恒为宣纸浅色，不随主题变化（PRD 15.3：深色主题导出自动切换浅色盘面） */
+  --export-bg: #f5f0e6;
+  --export-ink: #2b2620;
+  --export-ink-light: #6b6258;
+  --export-cinnabar: #a03a2b;
+  --export-gold: #b78a3f;
+  --export-border: #e2d8c4;
+  --export-on-accent: #fff;
+  --export-grad-0: #a03a2b;
+  --export-grad-1: #b78a3f;
+  --export-grad-2: #a03a2b;
+}
+
+[data-theme='dark'] {
+  --bg: #1e1a16;
+  --bg-card: #2a241d;
+  --ink: #e8dfcf;
+  --ink-light: #b8ad9a;
+  --cinnabar: #d06a58;
+  --cinnabar-dark: #b85344;
+  --gold: #c9a35f;
+  --border: #42392c;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --grad-center: radial-gradient(circle at 50% 42%, rgba(208, 106, 88, 0.1), rgba(201, 163, 95, 0.12) 48%, rgba(201, 163, 95, 0) 72%);
+
+  --cinnabar-soft: rgba(208, 106, 88, 0.12);
+  --gold-soft: rgba(201, 163, 95, 0.14);
+  --error-soft: rgba(208, 106, 88, 0.16);
+
+  --on-accent: #fff;
+  --overlay: rgba(0, 0, 0, 0.5);
+  --overlay-soft: rgba(0, 0, 0, 0.45);
+  --overlay-deep: rgba(0, 0, 0, 0.6);
+  --toast-bg: rgba(20, 16, 12, 0.92);
+
+  --mu-lu: #c9a35f;
+  --mu-quan: #d06a58;
+  --mu-ke: #5d9a72;
+  --mu-ji: #b8ad9a;
+}
+
+/* 主题切换仅过渡颜色，禁止 transition: all */
+.theme-transition,
+.theme-transition * {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transition,
+  .theme-transition * {
+    transition: none;
+  }
+}
+
+/* 打印：统一强制宣纸浅色，避免深色主题打印成深底 */
+@media print {
+  :root,
+  [data-theme='dark'] {
+    --bg: #f5f0e6;
+    --bg-card: #fdfaf3;
+    --ink: #2b2620;
+    --ink-light: #6b6258;
+    --cinnabar: #a03a2b;
+    --cinnabar-dark: #842f22;
+    --gold: #b78a3f;
+    --border: #e2d8c4;
+    --shadow: 0 4px 20px rgba(60, 45, 25, 0.06);
+    --grad-btn: linear-gradient(135deg, #a03a2b, #842f22);
+    --grad-line: linear-gradient(90deg, #a03a2b, #b78a3f, #a03a2b);
+    --cinnabar-soft: rgba(160, 58, 43, 0.06);
+    --gold-soft: rgba(183, 138, 63, 0.08);
+    --mu-lu: #b78a3f;
+    --mu-quan: #a03a2b;
+    --mu-ke: #3d6b4d;
+    --mu-ji: #2b2620;
+  }
+}
