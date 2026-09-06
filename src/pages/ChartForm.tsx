@@ -149,6 +149,29 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
         </button>
       </div>
 
+      {/* 示例盘：降低「必须填生日才能进入」的门槛（PRD 7.5），置于首屏显眼处 */}
+      <div
+        className="mb-4 rounded p-3"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
+        <p className="mb-2 text-[0.75rem]" style={{ color: 'var(--ink-light)' }}>
+          不知道填什么？先试试示例盘，一键看效果：
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {EXAMPLES.map((ex) => (
+            <button
+              key={ex.label}
+              type="button"
+              onClick={() => onCast(ex.input)}
+              className="rounded-sm px-3 py-1.5 text-[0.75rem]"
+              style={{ border: '1px solid var(--border)', color: 'var(--ink)' }}
+            >
+              {ex.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 三张差异化引导卡（PRD 7.5：准 / 懂 / 私密） */}
       <div className="mb-4 grid gap-2 sm:grid-cols-3">
         {[
@@ -427,28 +450,6 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
         <p className="mt-3 text-center text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
           支持 {1900}–{2100} 年出生 · 当前参考年 {CURRENT_YEAR}
         </p>
-      </div>
-
-      <div
-        className="mt-4 rounded p-3"
-        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-      >
-        <p className="mb-2 text-[0.75rem]" style={{ color: 'var(--ink-light)' }}>
-          想先体验？选一个示例盘：
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {EXAMPLES.map((ex) => (
-            <button
-              key={ex.label}
-              type="button"
-              onClick={() => onCast(ex.input)}
-              className="rounded-sm px-3 py-1.5 text-[0.75rem]"
-              style={{ border: '1px solid var(--border)', color: 'var(--ink)' }}
-            >
-              {ex.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       <p className="mt-6 text-center text-[0.6875rem] leading-relaxed" style={{ color: 'var(--ink-light)' }}>

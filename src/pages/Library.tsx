@@ -7,6 +7,8 @@ import { useLibraryStore } from '@/store/useLibraryStore';
 
 interface Props {
   onOpen: (input: BirthInput) => void;
+  /** 以该盘为「命盘一」进入双盘对照 */
+  onCompare: (input: BirthInput) => void;
   onBack: () => void;
 }
 
@@ -16,7 +18,7 @@ function formatDate(ts: number): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-export function Library({ onOpen, onBack }: Props) {
+export function Library({ onOpen, onCompare, onBack }: Props) {
   const charts = useLibraryStore((s) => s.charts);
   const remove = useLibraryStore((s) => s.remove);
   const update = useLibraryStore((s) => s.update);
@@ -303,6 +305,15 @@ export function Library({ onOpen, onBack }: Props) {
                     style={{ background: 'var(--grad-btn)' }}
                   >
                     打开
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onCompare(c.input)}
+                    className="rounded-sm px-3 py-1.5 text-[0.8125rem]"
+                    style={{ border: '1px solid var(--border)', color: 'var(--ink-light)' }}
+                    title="以这张盘作为命盘一，再录入另一张进行对照"
+                  >
+                    对比
                   </button>
                   <button
                     type="button"

@@ -5,6 +5,7 @@ import { PalaceGrid } from '@/components/PalaceGrid';
 import { PalaceList } from '@/components/PalaceList';
 import { ChartGuide } from '@/components/ChartGuide';
 import { LS_CHART_GUIDE } from '@/constants';
+import { STAR_MEANING } from '@/data/terms';
 import {
   daXianPalaceIndex,
   detectPatterns,
@@ -24,6 +25,14 @@ interface Props {
   onBack: () => void;
   /** 进入双盘对照 */
   onCompare: () => void;
+  /** 打开盘库（保存后引导跳转用） */
+  onOpenLibrary: () => void;
+}
+
+/** 轻提示，可带一个操作（如「去盘库查看」） */
+interface ToastAction {
+  label: string;
+  onClick: () => void;
 }
 
 /** 由出生年推算当前虚岁，用于高亮当前大限 */
@@ -32,7 +41,7 @@ function nominalAge(chart: Chart): number {
   return new Date().getFullYear() - birthYear + 1;
 }
 
-export function ChartView({ chart, onBack, onCompare }: Props) {
+export function ChartView({ chart, onBack, onCompare, onOpenLibrary }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
 
   // 三方四正联动：选中宫位后，本宫＋三方四正以金色细框在盘面标出
@@ -72,20 +81,25 @@ export function ChartView({ chart, onBack, onCompare }: Props) {
   const input = useChartStore((s) => s.input);
   const saveCurrent = useLibraryStore((s) => s.saveCurrent);
   const findByInput = useLibraryStore((s) => s.findByInput);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ text: string; action?: ToastAction } | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
 
-  function showToast(msg: string) {
-    setToast(msg);
+  function showToast(text: string, action?: ToastAction) {
+    setToast({ text, action });
     window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), 2200);
+    // 带操作的提示停留更久，给用户点击时间
+    toastTimer.current = window.setTimeout(() => setToast(null), action ? 5000 : 2200);
   }
 
   async function handleSave() {
     if (!input) return;
     const existing = findByInput(input);
     await saveCurrent(input);
-    showToast(existing ? '已在盘库，已更新' : '已存入盘库');
+    // PRD：保存后给出可达的下一步，而非只有一句 toast
+    showToast(existing ? '已在盘库，已更新' : '已存入盘库', {
+      label: '去盘库查看',
+      onClick: onOpenLibrary,
+    });
   }
 
   async function handleShare() {
@@ -116,6 +130,13 @@ export function ChartView({ chart, onBack, onCompare }: Props) {
 
   const soulPalace = chart.palaces[chart.soulPalaceIndex];
   const correction = chart.correction;
+
+  // 命宫主星性质关键词（中性知识，不含吉凶与运势判断）
+  const soulMeaning = soulPalace.majorStars
+    .map((s) => STAR_MEANING[s.name])
+    .filter(Boolean)
+    .join('；');
+  const bodyPalaceName = chart.palaces[chart.bodyPalaceIndex]?.name ?? '—';
 
   return (
     <div className="mx-auto w-full max-w-[720px] px-3 pb-12 xl:max-w-[1100px]">
@@ -167,10 +188,24 @@ export function ChartView({ chart, onBack, onCompare }: Props) {
       {toast && (
         <div className="no-print fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
           <div
-            className="rounded-full px-4 py-2 text-[0.8125rem] text-white shadow-lg"
+            className="flex max-w-full items-center gap-3 rounded-full px-4 py-2 text-[0.8125rem] text-white shadow-lg"
             style={{ background: 'var(--toast-bg)' }}
+            role="status"
           >
-            {toast}
+            <span>{toast.text}</span>
+            {toast.action && (
+              <button
+                type="button"
+                onClick={() => {
+                  toast.action?.onClick();
+                  setToast(null);
+                }}
+                className="shrink-0 underline"
+                style={{ color: 'var(--on-accent)' }}
+              >
+                {toast.action.label}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -246,6 +281,28 @@ export function ChartView({ chart, onBack, onCompare }: Props) {
       </div>
 
       {/* 时间轴：本命大限 / 流年切换 */}
+      {/* 本命盘速览：命宫主星性质 + 盘面要点 */}
+      <div
+        className="mb-3 rounded p-3"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
+        <div className="text-kai text-[0.875rem]" style={{ color: 'var(--cinnabar)' }}>
+          本命盘速览
+        </div>
+        {soulMeaning ? (
+          <p className="mt-1 text-[0.8125rem] leading-relaxed" style={{ color: 'var(--ink)' }}>
+            命宫 {majorStarLabel(soulPalace)}：{soulMeaning}
+          </p>
+        ) : (
+          <p className="mt-1 text-[0.8125rem]" style={{ color: 'var(--ink)' }}>
+            命宫无十四主星（空宫），性格与格局需借对宫星曜参看。
+          </p>
+        )}
+        <p className="mt-1 text-[0.75rem]" style={{ color: 'var(--ink-light)' }}>
+          {chart.fiveElementsClass} · 命主{chart.soul} · 身主{chart.body} · 身宫在{bodyPalaceName}
+        </p>
+      </div>
+
       <div data-guide="timeline" className="no-print mb-3 flex flex-wrap items-center gap-2">
         <div className="flex overflow-hidden rounded-sm" style={{ border: '1px solid var(--border)' }}>
           <button

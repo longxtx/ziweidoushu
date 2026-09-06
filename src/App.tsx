@@ -121,6 +121,11 @@ export default function App() {
     void cast(input);
     setView('home');
   };
+  // 盘库「对比」：先排该盘作为命盘一，再进入双盘对照
+  const compareFromLibrary = async (input: BirthInput) => {
+    await cast(input);
+    setCompare(true);
+  };
   const closeShare = () => {
     setShareActive(false);
     clear();
@@ -166,11 +171,16 @@ export default function App() {
         </Suspense>
       ) : chart ? (
         <Suspense fallback={<Loading text="命盘加载中" />}>
-          <ChartView chart={chart} onBack={clear} onCompare={() => setCompare(true)} />
+          <ChartView
+            chart={chart}
+            onBack={clear}
+            onCompare={() => setCompare(true)}
+            onOpenLibrary={openLibrary}
+          />
         </Suspense>
       ) : view === 'library' ? (
         <Suspense fallback={<Loading text="盘库加载中" />}>
-          <Library onOpen={openFromLibrary} onBack={backHome} />
+          <Library onOpen={openFromLibrary} onCompare={compareFromLibrary} onBack={backHome} />
         </Suspense>
       ) : (
         <ChartForm onCast={cast} onLibrary={openLibrary} error={error?.message ?? null} />
