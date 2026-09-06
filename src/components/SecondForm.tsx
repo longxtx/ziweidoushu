@@ -157,15 +157,22 @@ export function SecondForm({ onChart }: Props) {
                   key={b}
                   type="button"
                   onClick={() => setTimeIndex(i)}
-                  className="rounded-sm py-[5px] text-[0.75rem]"
+                  className="rounded-sm py-[5px] leading-tight"
                   style={{
                     background: timeIndex === i ? 'var(--gold)' : 'transparent',
                     color: timeIndex === i ? 'var(--on-accent)' : 'var(--ink)',
                     border: `1px solid ${timeIndex === i ? 'var(--gold)' : 'var(--border)'}`,
                   }}
-                  title={TIME_RANGES[i]}
+                  title={`${b}时 ${TIME_RANGES[i]}`}
+                  aria-label={`${b}时 ${TIME_RANGES[i]}`}
                 >
-                  {b}
+                  <span className="block text-[0.75rem]">{b}</span>
+                  <span
+                    className="block text-[0.5625rem]"
+                    style={{ color: timeIndex === i ? 'var(--on-accent)' : 'var(--ink-light)' }}
+                  >
+                    {TIME_RANGES[i].replace(/:00/g, '')}
+                  </span>
                 </button>
               ))}
             </div>

@@ -107,7 +107,8 @@ export function ChartView({ chart, onBack, onCompare, onOpenLibrary }: Props) {
     const url = buildShareUrl(input);
     try {
       await navigator.clipboard.writeText(url);
-      showToast('分享链接已复制');
+      // 给出可达的下一步：链接已复制，还可直接生成分享图
+      showToast('分享链接已复制', { label: '生成分享图', onClick: handleExport });
     } catch {
       // 剪贴板不可用时降级为可复制的弹窗
       window.prompt('复制此分享链接分享给朋友：', url);

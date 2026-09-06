@@ -81,7 +81,7 @@ const inputStyle = {
 };
 
 interface Props {
-  onCast: (input: BirthInput) => void;
+  onCast: (input: BirthInput) => void | Promise<void>;
   onLibrary: () => void;
   error?: string | null;
 }
@@ -106,24 +106,42 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
   );
   const [ziStrategy, setZiStrategy] = useState<ZiStrategy>('late-zi-next-day');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // 排盘进行中：引擎为按需加载，首次可能需下载，必须给出反馈（PRD 7.3）
+  const [submitting, setSubmitting] = useState(false);
 
   const city = findCity(cityName) ?? CITIES[0];
 
-  const submit = () => {
-    onCast({
-      calendar,
-      solarDate,
-      lunarDate: { year: lunarYear, month: lunarMonth, day: lunarDay, isLeapMonth },
-      // 不知时辰时按午时排盘，并在结果页常驻提示（PRD 7.3）
-      timeIndex: timeUnknown ? 6 : timeIndex,
-      isEarlyZi,
-      timeUnknown,
-      gender,
-      timezoneOffset: tzOffset,
-      longitude: city.longitude,
-      useTrueSolarTime,
-      ziStrategy,
-    });
+  const buildInput = (): BirthInput => ({
+    calendar,
+    solarDate,
+    lunarDate: { year: lunarYear, month: lunarMonth, day: lunarDay, isLeapMonth },
+    // 不知时辰时按午时排盘，并在结果页常驻提示（PRD 7.3）
+    timeIndex: timeUnknown ? 6 : timeIndex,
+    isEarlyZi,
+    timeUnknown,
+    gender,
+    timezoneOffset: tzOffset,
+    longitude: city.longitude,
+    useTrueSolarTime,
+    ziStrategy,
+  });
+
+  const submit = async () => {
+    setSubmitting(true);
+    try {
+      await onCast(buildInput());
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const useExample = async (input: BirthInput) => {
+    setSubmitting(true);
+    try {
+      await onCast(input);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -162,7 +180,8 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
             <button
               key={ex.label}
               type="button"
-              onClick={() => onCast(ex.input)}
+              onClick={() => void useExample(ex.input)}
+              disabled={submitting}
               className="rounded-sm px-3 py-1.5 text-[0.75rem]"
               style={{ border: '1px solid var(--border)', color: 'var(--ink)' }}
             >
@@ -195,6 +214,11 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
       </div>
 
       <div className="rounded p-4" style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow)' }}>
+        {/* 明确告知默认值为示例信息，避免用户误排他人的盘 */}
+        <p className="mb-3 text-[0.75rem]" style={{ color: 'var(--ink-light)' }}>
+          下面是示例信息，请改成你自己的出生日期与时辰。
+        </p>
+
         {/* 历法切换 */}
         <div className="mb-4 flex gap-2">
           {(['solar', 'lunar'] as const).map((c) => (
@@ -287,16 +311,23 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
                 key={b}
                 type="button"
                 onClick={() => setTimeIndex(i)}
-                className="rounded-sm py-[6px] text-[0.8125rem]"
+                className="rounded-sm py-[5px] leading-tight"
                 style={{
                   background: timeIndex === i ? 'var(--gold)' : 'transparent',
                   color: timeIndex === i ? 'var(--on-accent)' : 'var(--ink)',
                   border: `1px solid ${timeIndex === i ? 'var(--gold)' : 'var(--border)'}`,
                 }}
-                title={TIME_RANGES[i]}
+                title={`${b}时 ${TIME_RANGES[i]}`}
                 aria-label={`${b}时 ${TIME_RANGES[i]}`}
               >
-                {b}
+                {/* 直接显示时间段：移动端无 hover，不能只靠 title */}
+                <span className="block text-[0.8125rem]">{b}</span>
+                <span
+                  className="block text-[0.5625rem]"
+                  style={{ color: timeIndex === i ? 'var(--on-accent)' : 'var(--ink-light)' }}
+                >
+                  {TIME_RANGES[i].replace(/:00/g, '')}
+                </span>
               </button>
             ))}
           </div>
@@ -440,11 +471,16 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
 
         <button
           type="button"
-          onClick={submit}
+          onClick={() => void submit()}
+          disabled={submitting}
           className="w-full rounded py-3 text-[0.9375rem] text-white"
-          style={{ background: 'var(--grad-btn)', boxShadow: 'var(--shadow)' }}
+          style={{
+            background: 'var(--grad-btn)',
+            boxShadow: 'var(--shadow)',
+            opacity: submitting ? 0.6 : 1,
+          }}
         >
-          开始排盘
+          {submitting ? '排盘中…' : '开始排盘'}
         </button>
 
         <p className="mt-3 text-center text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
