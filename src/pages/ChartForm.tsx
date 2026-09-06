@@ -1,11 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { LS_DEFAULT_TRUE_SOLAR, TIME_BRANCHES, TIME_RANGES, TIMEZONE_OPTIONS } from '@/constants';
-import { CITIES, findCity } from '@/data/cities';
+import { LS_DEFAULT_TRUE_SOLAR, LS_FORM_DRAFT, TIME_BRANCHES, TIME_RANGES, TIMEZONE_OPTIONS } from '@/constants';
+import { CITIES, CITY_GROUPS, COMMON_CITIES, findCity } from '@/data/cities';
 import type { BirthInput, ZiStrategy } from '@/engine';
 import { Seal } from '@/components/Seal';
 
 const CURRENT_YEAR = new Date().getFullYear();
+
+/** 表单草稿：返回首页 / 重新排盘时保留输入，避免每次重填（用户微调时辰场景） */
+interface FormDraft {
+  calendar?: 'solar' | 'lunar';
+  solarDate?: string;
+  lunarYear?: number;
+  lunarMonth?: number;
+  lunarDay?: number;
+  isLeapMonth?: boolean;
+  timeIndex?: number;
+  isEarlyZi?: boolean;
+  timeUnknown?: boolean;
+  gender?: 'male' | 'female';
+  cityName?: string;
+  tzOffset?: number;
+  ziStrategy?: ZiStrategy;
+}
+
+function loadDraft(): FormDraft {
+  try {
+    const raw = localStorage.getItem(LS_FORM_DRAFT);
+    return raw ? (JSON.parse(raw) as FormDraft) : {};
+  } catch {
+    return {};
+  }
+}
+
+const DRAFT = loadDraft();
 
 /** 首页示例盘：一键排盘，降低首次使用门槛（PRD 7.5 新手引导） */
 const EXAMPLES: { label: string; input: BirthInput }[] = [
@@ -87,29 +115,88 @@ interface Props {
 }
 
 export function ChartForm({ onCast, onLibrary, error }: Props) {
-  const [calendar, setCalendar] = useState<'solar' | 'lunar'>('solar');
-  const [solarDate, setSolarDate] = useState('1990-05-15');
-  const [lunarYear, setLunarYear] = useState(1990);
-  const [lunarMonth, setLunarMonth] = useState(4);
-  const [lunarDay, setLunarDay] = useState(21);
-  const [isLeapMonth, setIsLeapMonth] = useState(false);
+  const [calendar, setCalendar] = useState<'solar' | 'lunar'>(DRAFT.calendar ?? 'solar');
+  const [solarDate, setSolarDate] = useState(DRAFT.solarDate ?? '1990-05-15');
+  const [lunarYear, setLunarYear] = useState(DRAFT.lunarYear ?? 1990);
+  const [lunarMonth, setLunarMonth] = useState(DRAFT.lunarMonth ?? 4);
+  const [lunarDay, setLunarDay] = useState(DRAFT.lunarDay ?? 21);
+  const [isLeapMonth, setIsLeapMonth] = useState(DRAFT.isLeapMonth ?? false);
 
-  const [timeIndex, setTimeIndex] = useState(6);
-  const [isEarlyZi, setIsEarlyZi] = useState(true);
-  const [timeUnknown, setTimeUnknown] = useState(false);
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [cityName, setCityName] = useState('北京');
-  const [tzOffset, setTzOffset] = useState(8);
-  // 真太阳时默认开关读取设置页偏好（PRD 7.1 设置项）
+  const [timeIndex, setTimeIndex] = useState(DRAFT.timeIndex ?? 6);
+  const [isEarlyZi, setIsEarlyZi] = useState(DRAFT.isEarlyZi ?? true);
+  const [timeUnknown, setTimeUnknown] = useState(DRAFT.timeUnknown ?? false);
+  const [gender, setGender] = useState<'male' | 'female'>(DRAFT.gender ?? 'male');
+  const [cityName, setCityName] = useState(DRAFT.cityName ?? '北京');
+  const [tzOffset, setTzOffset] = useState(DRAFT.tzOffset ?? 8);
+  // 真太阳时默认开关读取设置页偏好（PRD 7.1 设置项），不随表单草稿覆盖
   const [useTrueSolarTime, setUseTrueSolarTime] = useState(
     () => localStorage.getItem(LS_DEFAULT_TRUE_SOLAR) !== 'off',
   );
-  const [ziStrategy, setZiStrategy] = useState<ZiStrategy>('late-zi-next-day');
+  const [ziStrategy, setZiStrategy] = useState<ZiStrategy>(DRAFT.ziStrategy ?? 'late-zi-next-day');
   const [showAdvanced, setShowAdvanced] = useState(false);
   // 排盘进行中：引擎为按需加载，首次可能需下载，必须给出反馈（PRD 7.3）
   const [submitting, setSubmitting] = useState(false);
+  // 农历 → 公历实时预览（动态加载引擎，不污染首屏包体）
+  const [lunarPreview, setLunarPreview] = useState<{ ok: boolean; text: string } | null>(null);
 
   const city = findCity(cityName) ?? CITIES[0];
+
+  // 表单草稿持久化：任意字段变更即写入 localStorage（PRD：返回后无需重填）
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        LS_FORM_DRAFT,
+        JSON.stringify({
+          calendar,
+          solarDate,
+          lunarYear,
+          lunarMonth,
+          lunarDay,
+          isLeapMonth,
+          timeIndex,
+          isEarlyZi,
+          timeUnknown,
+          gender,
+          cityName,
+          tzOffset,
+          ziStrategy,
+        }),
+      );
+    } catch {
+      /* 隐私模式或存储已满时静默忽略 */
+    }
+  }, [
+    calendar,
+    solarDate,
+    lunarYear,
+    lunarMonth,
+    lunarDay,
+    isLeapMonth,
+    timeIndex,
+    isEarlyZi,
+    timeUnknown,
+    gender,
+    cityName,
+    tzOffset,
+    ziStrategy,
+  ]);
+
+  // 农历输入实时转换为公历预览：引擎按需加载，避免首屏包体膨胀（PRD 9.7）
+  useEffect(() => {
+    if (calendar !== 'lunar') {
+      setLunarPreview(null);
+      return;
+    }
+    let cancelled = false;
+    void import('@/engine').then(({ lunarToSolarDate }) => {
+      if (cancelled) return;
+      const r = lunarToSolarDate(lunarYear, lunarMonth, lunarDay, isLeapMonth);
+      setLunarPreview(r.ok ? { ok: true, text: r.value } : { ok: false, text: r.error.message });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [calendar, lunarYear, lunarMonth, lunarDay, isLeapMonth]);
 
   const buildInput = (): BirthInput => ({
     calendar,
@@ -278,6 +365,14 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
               />
               闰月（若该年无此闰月会提示错误）
             </label>
+            {lunarPreview && (
+              <p
+                className="mb-4 text-[0.75rem]"
+                style={{ color: lunarPreview.ok ? 'var(--ink-light)' : 'var(--cinnabar)' }}
+              >
+                {lunarPreview.ok ? `对应公历：${lunarPreview.text}` : lunarPreview.text}
+              </p>
+            )}
           </>
         )}
 
@@ -395,10 +490,21 @@ export function ChartForm({ onCast, onLibrary, error }: Props) {
             onChange={(e) => setCityName(e.target.value)}
             style={inputStyle}
           >
-            {CITIES.map((c) => (
-              <option key={`${c.province}-${c.name}`} value={c.name}>
-                {c.province} · {c.name}
-              </option>
+            <optgroup label="常用城市">
+              {COMMON_CITIES.filter((name) => CITIES.some((c) => c.name === name)).map((name) => (
+                <option key={`common-${name}`} value={name}>
+                  {name}
+                </option>
+              ))}
+            </optgroup>
+            {CITY_GROUPS.map(({ province, cities }) => (
+              <optgroup key={province} label={province}>
+                {cities.map((c) => (
+                  <option key={`${c.province}-${c.name}`} value={c.name}>
+                    {c.name === c.province ? `${c.name}（直辖市）` : c.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </Field>

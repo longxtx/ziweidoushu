@@ -79,6 +79,8 @@ export const LS_DEFAULT_TRUE_SOLAR = 'zw-default-true-solar';
 export const LS_SCHOOL = 'zw-school';
 /** 命盘页三步引导已完成标记 */
 export const LS_CHART_GUIDE = 'zw-guide-chart-v1';
+/** 排盘表单草稿：返回后无需重填（用户微调场景） */
+export const LS_FORM_DRAFT = 'zw-form-draft';
 
 /** 四化 → 语义色（PRD 6.2.5） */
 export const MUTAGEN_COLORS: Record<string, string> = {

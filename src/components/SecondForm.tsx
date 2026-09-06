@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { LS_DEFAULT_TRUE_SOLAR, TIME_BRANCHES, TIME_RANGES, TIMEZONE_OPTIONS } from '@/constants';
-import { CITIES, findCity } from '@/data/cities';
+import { CITIES, CITY_GROUPS, COMMON_CITIES, findCity } from '@/data/cities';
 import { astrolabeByBirth } from '@/engine';
 import type { BirthInput, Chart, ZiStrategy } from '@/engine';
 
@@ -241,10 +241,21 @@ export function SecondForm({ onChart }: Props) {
               onChange={(e) => setCityName(e.target.value)}
               style={{ ...inputStyle, marginTop: 1 }}
             >
-              {CITIES.map((c) => (
-                <option key={`${c.province}-${c.name}`} value={c.name}>
-                  {c.province} · {c.name}
-                </option>
+              <optgroup label="常用城市">
+                {COMMON_CITIES.filter((name) => CITIES.some((c) => c.name === name)).map((name) => (
+                  <option key={`common-${name}`} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </optgroup>
+              {CITY_GROUPS.map(({ province, cities }) => (
+                <optgroup key={province} label={province}>
+                  {cities.map((c) => (
+                    <option key={`${c.province}-${c.name}`} value={c.name}>
+                      {c.name === c.province ? `${c.name}（直辖市）` : c.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>

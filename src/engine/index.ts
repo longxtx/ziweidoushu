@@ -2,6 +2,7 @@ export * from './types';
 export {
   astrolabeByBirth,
   daXianPalaceIndex,
+  lunarToSolarDate,
   toIztroTimeIndex,
   MIN_YEAR,
   MAX_YEAR,

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 
 import type { BirthInput } from '@/engine';
 import { parseBackup, serializeBackup } from '@/library/backup';
@@ -28,6 +28,27 @@ export function Library({ onOpen, onCompare, onBack }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState('');
+
+  // 计算每张盘的命宫主星与五行局摘要（动态加载引擎，保持按需、不污染盘库包体）
+  const [starSummaries, setStarSummaries] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let cancelled = false;
+    void import('@/engine').then(({ astrolabeByBirth }) => {
+      if (cancelled) return;
+      const next: Record<string, string> = {};
+      for (const c of charts) {
+        const r = astrolabeByBirth(c.input);
+        if (!r.ok) continue;
+        const soul = r.value.palaces[r.value.soulPalaceIndex];
+        const star = soul.majorStars.length ? soul.majorStars.map((s) => s.name).join('、') : '空宫';
+        next[c.id] = `${star}　${r.value.fiveElementsClass}`;
+      }
+      setStarSummaries(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [charts]);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
@@ -275,6 +296,11 @@ export function Library({ onOpen, onCompare, onBack }: Props) {
                 <p className="mt-1 text-[0.75rem]" style={{ color: 'var(--ink-light)' }}>
                   {chartSummary(c.input)}
                 </p>
+                {starSummaries[c.id] && (
+                  <p className="mt-1 text-[0.75rem] font-medium" style={{ color: 'var(--ink)' }}>
+                    {starSummaries[c.id]}
+                  </p>
+                )}
 
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {TAG_PRESET_LIST.map((tag) => {

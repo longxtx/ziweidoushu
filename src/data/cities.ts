@@ -60,3 +60,28 @@ export const DEFAULT_CITY = CITIES[0];
 export function findCity(name: string): City | undefined {
   return CITIES.find((c) => c.name === name);
 }
+
+/** 常用城市：置顶，便于快速选择 */
+export const COMMON_CITIES = [
+  '北京',
+  '上海',
+  '广州',
+  '深圳',
+  '成都',
+  '杭州',
+  '武汉',
+  '西安',
+  '南京',
+  '重庆',
+];
+
+/** 按省份分组：避免长列表平铺，配合 select 的 optgroup 使用 */
+export const CITY_GROUPS: { province: string; cities: City[] }[] = (() => {
+  const map = new Map<string, City[]>();
+  for (const c of CITIES) {
+    const list = map.get(c.province);
+    if (list) list.push(c);
+    else map.set(c.province, [c]);
+  }
+  return [...map.entries()].map(([province, cities]) => ({ province, cities }));
+})();

@@ -110,6 +110,35 @@ function lunarToSolar(y: number, m: number, d: number, isLeapMonth: boolean): st
 }
 
 /**
+ * 农历 → 公历（供表单实时预览使用）。
+ * 与排盘入口同样遵守 PRD 9.8：错误以 Result 返回，不抛异常。
+ */
+export function lunarToSolarDate(
+  y: number,
+  m: number,
+  d: number,
+  isLeapMonth: boolean,
+): Result<string> {
+  if (!Number.isInteger(y) || y < MIN_LUNAR_YEAR || y > MAX_LUNAR_YEAR) {
+    return err(
+      'DATE_OUT_OF_RANGE',
+      `暂不支持 ${MIN_LUNAR_YEAR} 年之前或 ${MAX_LUNAR_YEAR} 年之后的农历日期`,
+    );
+  }
+  if (!Number.isInteger(m) || m < 1 || m > 12) {
+    return err('INVALID_LUNAR_DATE', `农历月份应在 1–12 之间，当前为「${m}」`);
+  }
+  if (!Number.isInteger(d) || d < 1 || d > 30) {
+    return err('INVALID_LUNAR_DATE', `农历日期应在 1–30 之间，当前为「${d}」`);
+  }
+  try {
+    return ok(lunarToSolar(y, m, d, isLeapMonth));
+  } catch (e) {
+    return err('INVALID_LUNAR_DATE', `农历 ${y} 年${CN_MONTH[m] ?? m}月${d} 日不存在，请确认日期`, e);
+  }
+}
+
+/**
  * 排盘主入口（PRD 9.8）
  *
  * 相同输入永远返回相同结果；错误以 Result 返回，不抛异常。
