@@ -8,7 +8,7 @@ import { useLibraryStore } from '@/store/useLibraryStore';
 
 /**
  * 设置与合规（PRD 7.1 P0 / 9.6 清理能力 / 第 8 章隐私）
- * 含：真太阳时默认、流派、隐私说明、免责声明、意见反馈、一键清除本地数据。
+ * 含：真太阳时默认、流派、隐私说明、免责声明、一键清除本地数据。
  */
 interface Props {
   onBack: () => void;
@@ -132,18 +132,7 @@ export function Settings({ onBack }: Props) {
           hint="本工具用于传统文化研究与娱乐，不构成医疗、法律、投资或人生决策建议；涉及健康的描述仅为养生提示。"
         />
 
-        <Row
-          title="意见反馈"
-          hint="发现排盘结果与权威工具不一致？欢迎反馈具体出生参数与差异点，用于规则校正。"
-        >
-          <a
-            href="mailto:feedback@ziwei-lab.example?subject=紫微鉴反馈"
-            className="text-[0.8125rem] underline"
-            style={{ color: 'var(--cinnabar)' }}
-          >
-            发送反馈邮件
-          </a>
-        </Row>
+
 
         <Row title="清除本地数据" hint="删除本机保存的全部命盘、偏好与缓存（不可恢复）。">
           <button
