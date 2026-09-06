@@ -98,7 +98,7 @@ export function Settings({ onBack }: Props) {
 
         <Row
           title="流派偏好"
-          hint="MVP 阶段排盘结果与流派无关（内核为通用规则）。该偏好将随 V1.0 自研引擎接入后生效，用于解读口径与差异标注。"
+          hint="三合派以星曜性质为重，四化派以飞星四化为主，两者对同一盘面的解读角度不同。"
         >
           <div className="flex gap-2">
             {[

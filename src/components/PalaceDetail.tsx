@@ -275,9 +275,6 @@ export function PalaceDetail({ chart, index, onClose, inline }: Props) {
               <li key={b}>{b}</li>
             ))}
           </ul>
-          <p className="mt-2 text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
-            完整推导轨迹将在自研引擎（V1.0）中逐步开放。
-          </p>
         </Section>
 
         <p

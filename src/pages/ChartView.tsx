@@ -449,9 +449,6 @@ export function ChartView({ chart, onBack, onCompare }: Props) {
           </ul>
         )}
 
-        <p className="mt-2 text-[0.625rem]" style={{ color: 'var(--ink-light)' }}>
-          格局的吉凶倾向属命理结论，待内容审校后接入（PRD 10.1）；此处仅呈现成立条件与依据。
-        </p>
       </div>
 
       {!guideDone && <ChartGuide onDone={() => setGuideDone(true)} />}
