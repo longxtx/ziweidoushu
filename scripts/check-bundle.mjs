@@ -4,9 +4,9 @@
  * 统计口径：dist/index.html 直接引用的资源（入口 JS、CSS 与 modulepreload 的静态依赖）。
  * 排盘引擎、命盘页、盘库、合盘等为按需懒加载分包，不计入首屏。
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 const BUDGET_KB = 200;
 const DIST = join(process.cwd(), 'dist');
@@ -50,3 +50,24 @@ if (totalKb > BUDGET_KB) {
 }
 
 console.log('✓ 首屏包体在预算内');
+
+// 文档不得进入部署产物：md 仅存于仓库做备份，不部署到线上
+function walk(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...walk(full));
+    else out.push(full);
+  }
+  return out;
+}
+
+const mdInDist = walk(DIST).filter((f) => f.toLowerCase().endsWith('.md'));
+
+if (mdInDist.length > 0) {
+  console.error(`\n✖ 部署产物中发现 ${mdInDist.length} 个 md 文件（文档不应部署）：`);
+  for (const f of mdInDist) console.error('  ' + relative(process.cwd(), f));
+  process.exit(1);
+}
+
+console.log('✓ 部署产物不含 md 文档');
