@@ -139,15 +139,6 @@ export function ChartView({ chart, onBack, onCompare }: Props) {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={onCompare}
-            className="rounded-sm px-2 py-1 text-[0.75rem]"
-            style={{ border: '1px solid var(--gold)', color: 'var(--gold)' }}
-            title="双盘对照：与另一张命盘并排比较"
-          >
-            合盘
-          </button>
-          <button
-            type="button"
             onClick={() => void handleSave()}
             className="rounded-sm px-2.5 py-1 text-[0.75rem]"
             style={{ border: '1px solid var(--border)', color: 'var(--cinnabar)' }}
@@ -323,6 +314,17 @@ export function ChartView({ chart, onBack, onCompare }: Props) {
             )}
           </div>
         )}
+
+        {/* 双盘对照：低频操作，放在工具栏避免头部按钮拥挤（小屏更易点按） */}
+        <button
+          type="button"
+          onClick={onCompare}
+          className="rounded-sm px-2 py-1 text-[0.75rem]"
+          style={{ border: '1px solid var(--gold)', color: 'var(--gold)' }}
+          title="双盘对照：与另一张命盘并排比较"
+        >
+          合盘
+        </button>
 
         {/* 宫格 / 列表 视图切换（PRD F2） */}
         <div className="ml-auto flex overflow-hidden rounded-sm" style={{ border: '1px solid var(--border)' }}>

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { MUTAGEN_COLORS, MUTAGEN_MEANING } from '@/constants';
+import { PALACE_MEANING, starMeaning } from '@/data/terms';
 import { brightnessState, detectPatterns, majorStarLabel, oppositeIndex, palaceMutagens, stateToken, trineIndices } from '@/engine';
 import type { Chart } from '@/engine';
 import { StarTag } from './StarTag';
@@ -155,6 +156,12 @@ export function PalaceDetail({ chart, index, onClose, inline }: Props) {
           </button>
         </header>
 
+        {PALACE_MEANING[palace.name] && (
+          <p className="mt-1 text-[0.75rem]" style={{ color: 'var(--ink)' }}>
+            {PALACE_MEANING[palace.name]}
+          </p>
+        )}
+
         <p className="mt-1 text-[0.8125rem]" style={{ color: 'var(--ink-light)' }}>
           {majorStarLabel(palace)}　长生：{palace.changsheng12}　博士：{palace.boshi12}
         </p>
@@ -166,28 +173,38 @@ export function PalaceDetail({ chart, index, onClose, inline }: Props) {
                 本宫无十四主星（空宫），其对宫与三合宫的影响需重点参看。
               </p>
             )}
-            {[...palace.majorStars, ...palace.minorStars].map((s) => (
-              <div key={s.name} className="flex flex-wrap items-center gap-2">
-                <StarTag star={s} size="major" interactive />
-                <StateBadge state={brightnessState(s.brightness)} />
-                {s.brightness && (
-                  <span className="text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
-                    {s.brightness}
-                  </span>
-                )}
-                {s.mutagen && (
-                  <span
-                    className="text-[0.6875rem]"
-                    style={{ color: MUTAGEN_COLORS[s.mutagen] }}
-                  >
-                    化{s.mutagen}　{MUTAGEN_MEANING[s.mutagen]}
-                  </span>
-                )}
-                <span className="text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
-                  {s.type}
-                </span>
-              </div>
-            ))}
+            {[...palace.majorStars, ...palace.minorStars].map((s) => {
+              const meaning = starMeaning(s.name);
+              return (
+                <div key={s.name} className="flex flex-col gap-[2px]">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StarTag star={s} size="major" interactive />
+                    <StateBadge state={brightnessState(s.brightness)} />
+                    {s.brightness && (
+                      <span className="text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
+                        {s.brightness}
+                      </span>
+                    )}
+                    {s.mutagen && (
+                      <span
+                        className="text-[0.6875rem]"
+                        style={{ color: MUTAGEN_COLORS[s.mutagen] }}
+                      >
+                        化{s.mutagen}　{MUTAGEN_MEANING[s.mutagen]}
+                      </span>
+                    )}
+                    <span className="text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
+                      {s.type}
+                    </span>
+                  </div>
+                  {meaning && (
+                    <span className="text-[0.6875rem]" style={{ color: 'var(--ink-light)' }}>
+                      {meaning}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </Section>
 

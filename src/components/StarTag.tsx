@@ -1,6 +1,7 @@
 import { brightnessState, stateToken } from '@/engine';
 import type { Star } from '@/engine';
 import { MUTAGEN_COLORS, MUTAGEN_MEANING, STAR_TYPE_TIP } from '@/constants';
+import { starMeaning } from '@/data/terms';
 import { TermTip } from './TermTip';
 
 interface Props {
@@ -30,9 +31,11 @@ export function StarTag({ star, size = 'minor', showBrightness = false, interact
   const color = size === 'major' ? 'var(--ink)' : 'var(--ink-light)';
 
   // PRD 7.5：星曜 hover 显示分类说明，四化 hover 显示含义（中性术语，非命理结论）
-  const tipParts = [STAR_TYPE_TIP[star.type], star.mutagen ? `化${star.mutagen}：${MUTAGEN_MEANING[star.mutagen]}` : ''].filter(
-    Boolean,
-  );
+  const tipParts = [
+    starMeaning(star.name),
+    STAR_TYPE_TIP[star.type],
+    star.mutagen ? `化${star.mutagen}：${MUTAGEN_MEANING[star.mutagen]}` : '',
+  ].filter(Boolean);
   const tip = `${star.name}（${star.type}）${tipParts.length ? '\n' + tipParts.join('\n') : ''}`;
 
   return (
