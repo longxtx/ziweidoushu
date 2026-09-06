@@ -22,6 +22,8 @@ import { useLibraryStore } from '@/store/useLibraryStore';
 
 interface Props {
   chart: Chart;
+  /** 打开即定位某宫详情（盘库点命宫摘要直达） */
+  initialSelected?: number;
   onBack: () => void;
   /** 进入双盘对照 */
   onCompare: () => void;
@@ -41,8 +43,8 @@ function nominalAge(chart: Chart): number {
   return new Date().getFullYear() - birthYear + 1;
 }
 
-export function ChartView({ chart, onBack, onCompare, onOpenLibrary }: Props) {
-  const [selected, setSelected] = useState<number | null>(null);
+export function ChartView({ chart, initialSelected, onBack, onCompare, onOpenLibrary }: Props) {
+  const [selected, setSelected] = useState<number | null>(initialSelected ?? null);
 
   // 三方四正联动：选中宫位后，本宫＋三方四正以金色细框在盘面标出
   const linked = useMemo(() => {

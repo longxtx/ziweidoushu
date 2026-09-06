@@ -6,7 +6,8 @@ import { chartSummary, TAG_PRESET_LIST } from '@/library/format';
 import { useLibraryStore } from '@/store/useLibraryStore';
 
 interface Props {
-  onOpen: (input: BirthInput) => void;
+  /** 打开整盘；传入 palaceIndex 时直达该宫详情 */
+  onOpen: (input: BirthInput, palaceIndex?: number) => void;
   /** 以该盘为「命盘一」进入双盘对照 */
   onCompare: (input: BirthInput) => void;
   onBack: () => void;
@@ -29,21 +30,38 @@ export function Library({ onOpen, onCompare, onBack }: Props) {
 
   const [query, setQuery] = useState('');
 
-  // 计算每张盘的命宫主星与五行局摘要（动态加载引擎，保持按需、不污染盘库包体）
-  const [starSummaries, setStarSummaries] = useState<Record<string, string>>({});
+  // 速读摘要：命宫主星、五行局、身宫、命主、命宫索引（点击直达详情）。
+  // 动态加载引擎，保持按需、不污染盘库包体。
+  interface QuickRead {
+    soulStars: string;
+    fiveElements: string;
+    bodyPalace: string;
+    soul: string;
+    soulIndex: number;
+  }
+  const [quick, setQuick] = useState<Record<string, QuickRead>>({});
   useEffect(() => {
     let cancelled = false;
     void import('@/engine').then(({ astrolabeByBirth }) => {
       if (cancelled) return;
-      const next: Record<string, string> = {};
+      const next: Record<string, QuickRead> = {};
       for (const c of charts) {
         const r = astrolabeByBirth(c.input);
         if (!r.ok) continue;
-        const soul = r.value.palaces[r.value.soulPalaceIndex];
-        const star = soul.majorStars.length ? soul.majorStars.map((s) => s.name).join('、') : '空宫';
-        next[c.id] = `${star}　${r.value.fiveElementsClass}`;
+        const ast = r.value;
+        const soul = ast.palaces[ast.soulPalaceIndex];
+        const soulStars = soul.majorStars.length
+          ? soul.majorStars.map((s) => s.name).join('、')
+          : '空宫';
+        next[c.id] = {
+          soulStars,
+          fiveElements: ast.fiveElementsClass,
+          bodyPalace: ast.palaces[ast.bodyPalaceIndex]?.name ?? '—',
+          soul: ast.soul,
+          soulIndex: ast.soulPalaceIndex,
+        };
       }
-      setStarSummaries(next);
+      setQuick(next);
     });
     return () => {
       cancelled = true;
@@ -296,10 +314,21 @@ export function Library({ onOpen, onCompare, onBack }: Props) {
                 <p className="mt-1 text-[0.75rem]" style={{ color: 'var(--ink-light)' }}>
                   {chartSummary(c.input)}
                 </p>
-                {starSummaries[c.id] && (
-                  <p className="mt-1 text-[0.75rem] font-medium" style={{ color: 'var(--ink)' }}>
-                    {starSummaries[c.id]}
-                  </p>
+                {quick[c.id] && (
+                  <div className="mt-1 flex flex-col gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => onOpen(c.input, quick[c.id].soulIndex)}
+                      className="self-start text-left text-[0.75rem] font-medium"
+                      style={{ color: 'var(--ink)' }}
+                      title="点击查看命宫详情"
+                    >
+                      {quick[c.id].soulStars}　{quick[c.id].fiveElements}
+                    </button>
+                    <p className="text-[0.75rem]" style={{ color: 'var(--ink-light)' }}>
+                      身宫·{quick[c.id].bodyPalace}　命主·{quick[c.id].soul}
+                    </p>
+                  </div>
                 )}
 
                 <div className="mt-2 flex flex-wrap gap-1.5">

@@ -80,6 +80,8 @@ export default function App() {
   const [view, setView] = useState<'home' | 'library' | 'settings'>('home');
   const [compare, setCompare] = useState(false);
   const [shareActive, setShareActive] = useState(false);
+  // 盘库点命宫摘要直达：记录要定位的宫，打开命盘后传给 ChartView
+  const [pendingPalace, setPendingPalace] = useState<number | undefined>(undefined);
 
   // 启动后加载盘库（IndexedDB）
   useEffect(() => {
@@ -117,7 +119,8 @@ export default function App() {
 
   const openLibrary = () => setView('library');
   const backHome = () => setView('home');
-  const openFromLibrary = (input: BirthInput) => {
+  const openFromLibrary = (input: BirthInput, palaceIndex?: number) => {
+    setPendingPalace(palaceIndex);
     void cast(input);
     setView('home');
   };
@@ -173,6 +176,7 @@ export default function App() {
         <Suspense fallback={<Loading text="命盘加载中" />}>
           <ChartView
             chart={chart}
+            initialSelected={pendingPalace}
             onBack={clear}
             onCompare={() => setCompare(true)}
             onOpenLibrary={openLibrary}
